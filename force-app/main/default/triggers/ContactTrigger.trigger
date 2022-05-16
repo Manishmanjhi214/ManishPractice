@@ -1,7 +1,8 @@
-trigger ContactTrigger on Contact (before insert) {
-    switch on trigger.operationType{
-        when BEFORE_INSERT{
-            ContactTriggerHandler.Before_Insert(Trigger.new);
+trigger ContactTrigger on Contact (after insert) {
+    if(trigger.isAfter){
+        if(trigger.isInsert){
+            ContactTriggerHandler.sendEmailOnContactInsertion(Trigger.new);
         }
     }
-}
+    
+    }

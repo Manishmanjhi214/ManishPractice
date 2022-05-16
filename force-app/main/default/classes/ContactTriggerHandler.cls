@@ -1,17 +1,22 @@
 public class ContactTriggerHandler {
-    public static void Before_Insert(List<Contact> newContacts){
+    public static void sendEmailOnContactInsertion(List<Contact> newContacts){
         List<Messaging.SingleEmailMessage> mails = new List<Messaging.SingleEmailMessage>();
         EmailTemplate emailTemplate =[SELECT Id, Name, Subject, Body FROM EmailTemplate where Name =
                                       'Contact Email Template'];
         //Get templete id for set the templete.
         for(Contact myContact: newContacts){
-            if (myContact.Email != null && myContact.FirstName != null) { 
+            if (myContact.Email != null ) { 
             
                 // Step 1: Create a new Email
       Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
            	     
             mail.setTargetObjectId(myContact.id);
-			mail.setWhatId(myContact.Id);
+            mail.setWhatId(myContact.Id);
+			mail.setSenderDisplayName('System Administrator');
+            mail.setUseSignature(false);
+            mail.setBccSender(false);
+            mail.setSaveAsActivity(false);
+
                 
                 // Step 2: Set list of people who should get the email
       List<String> sendTo = new List<String>();
@@ -29,5 +34,9 @@ public class ContactTriggerHandler {
         }
         // Step 5: Send all emails in the master list
         Messaging.sendEmail(mails);
+    }
+
+    public static void preventInsertionOfDuplicateRecords(List<Contact> newContact) {
+        
     }
 }
