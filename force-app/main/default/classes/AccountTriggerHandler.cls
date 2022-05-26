@@ -63,4 +63,37 @@ public with sharing class AccountTriggerHandler {
         }
     }
 
+    public static void updateMonthOldOppoertunities(List<Account> accounts) {
+        List<Account> accountsWithOpp = [SELECT Id, Name, (Select Id, Name, StageName,CreatedDate FROM Opportunities 
+                                            WHERE CreatedDate < LAST_N_DAYS:30) FROM Account];
+        List<Opportunity> oldOppToUpdate = new List<Opportunity>();
+        for(Account acc: accountsWithOpp){
+            List<Opportunity> oppWithAcc = acc.Opportunities;
+            if(oppWithAcc.size()>0){
+                for(Opportunity opp : oppWithAcc){
+                    if(opp.StageName != 'Closed Won'){
+                            opp.StageName = 'Closed Lost';
+                    }
+                    oldOppToUpdate.add(opp);
+                }
+            } 
+        }
+        update oldOppToUpdate;
+    }
+
+    public static void createAccountAndContactClient(List<Account> newAccounts) {
+        List<Contact> contactsToBecreated = new List<Contact>();
+        for (Account acc : newAccounts) {
+            Contact con = new Contact(LastName =acc.Name+'Contact' , AccountId = acc.Id);
+            contactsToBecreated.add(con);
+        }
+        insert contactsToBecreated;
+        List<Account> acctobeUpdated = new List<Account>();
+        for(Contact con: contactsToBecreated){
+            Account acc = [Select Id, Name, Client_Contact_lookup_to_Contact__c  FROM Account WHERE Id=: con.AccountId];
+            acc.Client_Contact_lookup_to_Contact__c = con.Id;
+            acctobeUpdated.add(acc);
+        }
+        update acctobeUpdated;
+    }    
 }

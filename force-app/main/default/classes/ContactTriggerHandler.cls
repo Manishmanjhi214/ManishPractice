@@ -37,6 +37,71 @@ public class ContactTriggerHandler {
     }
 
     public static void preventInsertionOfDuplicateRecords(List<Contact> newContact) {
-        
+        String message='';
+        Map<String,Contact> mapContactEmail = new Map<String,Contact>();
+        Map<String,Object> mapContactPhone = new Map<String,Contact>();
+       
+        for(Contact con:newContact){
+            mapContactEmail.put(con.Email, con);
+            mapContactPhone.put(con.Phone, con);
+        }
+
+        List<Contact> existingContact = [Select Id, Email, Phone FROM Contact Where Email IN: mapContactEmail.keySet() 
+        OR Phone IN:mapContactPhone.keySet()];
+        if(existingContact.size()>0){
+            for(Contact con: existingContact){
+                if(con.Email != null){
+                    if(mapContactEmail.get(con.Email)!= null){
+                        message ='Enter new Email Error';
+                    }
+                }
+                if(con.Phone != null){
+                    if(mapContactPhone.get(con.Phone)!= null){
+                        message = 'Enter new phone Error';
+                    }
+                }
+           
+            }
+        }
+        if(message!=''){
+            newContact[0].addError(message);
+            }
+            
     }
+
+    public static void preventUpdationOfDuplicateRecords(List<Contact> oldContact,Map<Id,Contact> mapOfContact) {
+        String message= '';
+        Map<String,Contact> mapContactEmail = new Map<String,Contact>();
+        Map<String,Object> mapContactPhone = new Map<String,Contact>();
+        for(Contact con: oldContact){
+            if(con.Email != mapOfContact.get(con.Id).Email){
+                mapContactEmail.put(con.Email, con);
+            }
+            if(con.Phone != mapOfContact.get(con.Id).Phone){
+                mapContactPhone.put(con.Phone, con);
+            }
+        }   
+        List<Contact> existingContact = [Select Id, Email, Phone FROM Contact Where Email IN: mapContactEmail.keySet() 
+        OR Phone IN:mapContactPhone.keySet()];
+        if(existingContact.size()>0){
+            for(Contact con: existingContact){
+                if(con.Email != null){
+                    if(mapContactEmail.get(con.Email)!= null){
+                        message ='Enter new Email Error';
+                    }
+                }
+                if(con.Phone != null){
+                    if(mapContactPhone.get(con.Phone)!= null){
+                        message = 'Enter new phone Error';
+                    }
+                }
+           
+            }
+        }
+        if(message!=''){
+            oldContact[0].addError(message);
+        }
+       
+    }
+
 }
