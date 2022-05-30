@@ -95,5 +95,34 @@ public with sharing class AccountTriggerHandler {
             acctobeUpdated.add(acc);
         }
         update acctobeUpdated;
+    }
+    public static void sendEmailToAccountOnInsertion(List<Account> newAccounts) {
+        List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+        for(Account acc: newAccounts){
+                // Step 1: Create a new Email
+      Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+           	     
+			mail.setSenderDisplayName('System Administrator');
+            mail.setUseSignature(false);
+            mail.setBccSender(false);
+            mail.setSaveAsActivity(false);
+
+                
+                // Step 2: Set list of people who should get the email
+      List<User> sendTo = [SELECT Email FROM User WHERE Profile.Name = 'System Administrator'];
+      List<String> tomail = new List<String>();
+      for(User u:sendTo){
+        tomail.add(u.Email);
+      }
+      mail.setToAddresses(tomail);
+                // Step 3. Set email contents - you can use variables!
+      mail.setSubject('Account has been created with name:'+ acc.Name);
+      mail.setHtmlBody('<html><body>Hi, Account Has been created</body>  </html>');
+                
+             // Step 4. Add your email to the master list
+      emails.add(mail);
+                
+        }
+    Messaging.sendEmail(emails);
     }    
 }

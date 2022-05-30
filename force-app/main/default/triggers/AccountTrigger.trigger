@@ -15,6 +15,7 @@ trigger AccountTrigger on Account (before insert,after insert,before update ,aft
         if(Trigger.isInsert){
             AccountTriggerHandler.createAndAssociateContact(Trigger.new);
             AccountTriggerHandler.createAccountAndContactClient(Trigger.new);
+            AccountTriggerHandler.sendEmailToAccountOnInsertion(Trigger.new);
         }
         if(trigger.isUpdate){
             AccountTriggerHandler.updateContactMailAddress(Trigger.new,Trigger.oldMap);
