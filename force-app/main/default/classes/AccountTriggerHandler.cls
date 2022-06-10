@@ -117,12 +117,76 @@ public with sharing class AccountTriggerHandler {
       mail.setToAddresses(tomail);
                 // Step 3. Set email contents - you can use variables!
       mail.setSubject('Account has been created with name:'+ acc.Name);
-      mail.setHtmlBody('<html><body>Hi, Account Has been created</body>  </html>');
+      mail.setHtmlBody('<html><body>Hi, Account Has been created with '+ acc.Name+'</body> </html>');
                 
              // Step 4. Add your email to the master list
       emails.add(mail);
                 
         }
     Messaging.sendEmail(emails);
-    }    
+    }
+    
+    // public static void updateOpportunityAmountOnAccount(List<Account> newAccounts,Map<Id,Account> oldAccountValues) {
+    //     Set<Id> accIdWithOpp = new Set<Id>();
+    //     for(Account acc: newAccounts)
+    //     {
+    //         if(acc.Opportunities.size()>0 && acc.Opportunities != oldAccountValues.get(acc.Id).Opportunities){
+    //             accIdWithOpp.add(acc.Id);
+    //         }
+    //     }
+    //     List<Account> accountsWithOpp = [SELECT Id, Name, (Select Id, Amount From Opportunities) FROM Account
+    //                                         WHERE Id IN: accIdWithOpp];
+
+    //     List<Account> accountsToUpdate = new List<Account>();
+    //     for(Account acc: accountsWithOpp){
+    //         Decimal totalAmount=0;
+    //         for(Opportunity opp: acc.Opportunities){
+    //             totalAmount += opp.Amount;
+    //         }
+    //         acc.Name = acc.Name + String.valueOf(totalAmount);
+    //         accountsToUpdate.add(acc); 
+    //     }
+        
+    //     if(accountsToUpdate.size()>0){
+    //         update accountsToUpdate;
+    //     }
+    // }
+
+    public static void emailAlertOnAccountTypeChange(List<Account> newAccount,Map<Id,Account> mapOfAccount) {
+        List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+        Set<Id> accIds = new Set<Id>();
+        for (Account acc : newAccount) {
+            if(acc.Type != mapOfAccount.get(acc.Id).Type){
+                    accIds.add(acc.Id);
+            }
+        }
+        List<Contact> updatedAccountWithContacts = [SELECT Id,LastName, Email, Account.Name, AccountId FROM Contact
+                                                    WHERE AccountId IN: accIds];
+        if(updatedAccountWithContacts.size()>0){
+        for(Contact con: updatedAccountWithContacts){
+            if(con.Email != null){
+            // Step 1: Create a new Email
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+           	     
+            mail.setSenderDisplayName('System Administrator');
+            mail.setUseSignature(false);
+            mail.setBccSender(false);
+            mail.setSaveAsActivity(false);
+
+            // Step 2: Set list of people who should get the email
+            mail.ToAddresses= new String[] {con.Email};
+
+            // Step 3. Set email contents - you can use variables!
+            mail.setSubject(' Account Update Info');
+            mail.setHtmlBody('<html><body>Hi, Your account information has been updated successfully with new Type '+'</body> </html>');
+
+            // Step 4. Add your email to the master list
+            emails.add(mail);
+                }   
+            }
+        }
+        if(emails.size()>0){
+            Messaging.sendEmail(emails);
+        }
+    }
 }

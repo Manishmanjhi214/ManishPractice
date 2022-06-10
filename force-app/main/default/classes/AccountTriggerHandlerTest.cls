@@ -40,9 +40,27 @@ public with sharing class AccountTriggerHandlerTest {
             if(c.LastName == 'Test'+i && a.Name == 'Test'+i){
                 System.assertEquals(c.AccountId,a.Id);
                 System.assertEquals(c.LastName, a.Name);
-            }     
+                    }     
+                }
+            }
         }
-     }
     }
-    }
+
+   @isTest
+   private static void emailAlertOnAccountTypeChangeTest() {
+            List<Account> account = new List<Account>();
+            for(Integer i=50;i<50;i++){
+                Account acc= New Account(Name='Test'+i,Type='Prospect');
+                account.add(acc);
+                }
+            insert account;
+            Contact con = new Contact(LastName = 'Testcon1',Email ='nanurehan20@gmail.com',AccountId =acc.Id);
+            insert con;
+        Test.startTest();
+        acc.Type='Technology Partner';
+        update acc;
+        Integer emailInvocations = Limits.getEmailInvocations();
+        Test.stopTest();
+   system.assertEquals(50, emailInvocations, 'An email should be sent');
+   }  
 }
