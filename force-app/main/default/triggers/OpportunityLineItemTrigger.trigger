@@ -4,6 +4,8 @@ trigger OpportunityLineItemTrigger on OpportunityLineItem (after insert,after up
         if(Trigger.isInsert){
             OpportunityLineItemTriggerHandler.updateProductListOnOpporutnity(Trigger.new);
             OpportunityLineItemTriggerHandler.updateProductQuantityOnAccount(Trigger.new);
+            OpportunityLineItemTriggerHandler.insertQuotationOnLineItemCreation(Trigger.new);
+            OpportunityLineItemTriggerHandler.insertAssetOnLineItemCreation(Trigger.new);
         }
         if(Trigger.isUpdate){
             OpportunityLineItemTriggerHandler.updateProductListOnOpporutnity(Trigger.new);

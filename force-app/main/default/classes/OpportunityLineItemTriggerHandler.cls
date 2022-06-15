@@ -108,5 +108,39 @@ public with sharing class OpportunityLineItemTriggerHandler {
         }
         delete oppToDelete;
       }
+
+      public static void insertQuotationOnLineItemCreation(List<OpportunityLineItem> newOppLineItems) {
+        List<Quote> quo= new List<Quote>();
+        for(OpportunityLineItem oli: newOppLineItems){
+          Quote q= new Quote();
+          q.OpportunityId=oli.OpportunityId;
+          q.Name = 'quote' + oli.Name;
+          quo.add(q);
+        }
+        if(quo.size()>0){
+        insert quo;
+        }
+      }
+
+      public static void insertAssetOnLineItemCreation(List<OpportunityLineItem> newOppLineItems) {
+        Set<Id> oppIdWithOli = new Set<Id>();
+        List<Asset> ast= new List<Asset>();
+        for(OpportunityLineItem oli:newOppLineItems){
+          oppIdWithOli.add(oli.OpportunityId);
+        }
+        List<Opportunity> oppWithAccountId =[SELECT Id,Name,AccountId ,(Select Id,Name From OpportunityLineItems) From Opportunity WHERE Id IN: oppIdWithOli];
+        for(Opportunity op:oppWithAccountId){
+          List<OpportunityLineItem> oli= op.OpportunityLineItems;
+          for(OpportunityLineItem ol:oli){
+              Asset a= new Asset();
+              a.AccountId=op.AccountId;
+              a.Name = 'Asset' + ol.Name;
+              ast.add(a);
+            }
+        }
+        if(ast.size()>0){
+          insert ast;
+        }
+      }
       
 }

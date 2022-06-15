@@ -104,4 +104,32 @@ public class ContactTriggerHandler {
        
     }
 
+    public static void updateOpportunityAmountOnContactUpdate(List<Contact> newContacts,Map<Id,Contact> oldValue) {
+        Set<Id> accIdWithOpp = new Set<Id>();
+        for(Contact con: newContacts)
+        {   if(con.AccountId != oldValue.get(con.Id).AccountId ){
+                accIdWithOpp.add(con.AccountId);
+            }
+        }
+        List<AggregateResult> results = [SELECT AccountId, Sum(Amount) TotalAmount FROM Opportunity
+                                            WHERE AccountId IN:accIdWithOpp 
+                                            Group By AccountId];
+        Map<Id,Double> accMap = new Map<Id,Double>();
+        List<Account> accountsToUpdate = new List<Account>();
+        for(AggregateResult res: results){
+            Id accountId = (Id) res.get('AccountId');
+            Double totalAmount = (double) res.get('TotalAmount');
+            accMap.put(accountId, totalAmount);
+        }
+        List<Account> conRelatedToAccount = [Select Id,Name,Total_Opportunity_Amount__c FROM Account WHERE Id IN: accIdWithOpp];
+        for(Account con:conRelatedToAccount){
+            if(accMap.containsKey(con.Id)){
+                con.Total_Opportunity_Amount__c = accMap.get(con.Id);
+            }
+        }
+        if(accountsToUpdate.size()>0){
+            update accountsToUpdate;
+        }
+    }
+
 }

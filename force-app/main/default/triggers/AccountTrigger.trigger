@@ -6,6 +6,7 @@ trigger AccountTrigger on Account (before insert,after insert,before update ,aft
         if(trigger.isUpdate){
             AccountTriggerHandler.validateAccountNameUpdate(Trigger.new,Trigger.oldMap);
             AccountTriggerHandler.updateMonthOldOppoertunities(Trigger.new);
+            //AccountTriggerHandler.updateOpportunityAmountOnAccount(Trigger.new);
         }
         if(trigger.isDelete){
             AccountTriggerHandler.validateDeletion(Trigger.old);
@@ -19,7 +20,6 @@ trigger AccountTrigger on Account (before insert,after insert,before update ,aft
         }
         if(trigger.isUpdate){
             AccountTriggerHandler.updateContactMailAddress(Trigger.new,Trigger.oldMap);
-            //AccountTriggerHandler.updateOpportunityAmountOnAccount(Trigger.new,Trigger.oldMap);
             AccountTriggerHandler.emailAlertOnAccountTypeChange(Trigger.new, Trigger.oldMap);
         }
     }

@@ -126,31 +126,32 @@ public with sharing class AccountTriggerHandler {
     Messaging.sendEmail(emails);
     }
     
-    // public static void updateOpportunityAmountOnAccount(List<Account> newAccounts,Map<Id,Account> oldAccountValues) {
-    //     Set<Id> accIdWithOpp = new Set<Id>();
-    //     for(Account acc: newAccounts)
-    //     {
-    //         if(acc.Opportunities.size()>0 && acc.Opportunities != oldAccountValues.get(acc.Id).Opportunities){
-    //             accIdWithOpp.add(acc.Id);
-    //         }
-    //     }
-    //     List<Account> accountsWithOpp = [SELECT Id, Name, (Select Id, Amount From Opportunities) FROM Account
-    //                                         WHERE Id IN: accIdWithOpp];
-
-    //     List<Account> accountsToUpdate = new List<Account>();
-    //     for(Account acc: accountsWithOpp){
-    //         Decimal totalAmount=0;
-    //         for(Opportunity opp: acc.Opportunities){
-    //             totalAmount += opp.Amount;
-    //         }
-    //         acc.Name = acc.Name + String.valueOf(totalAmount);
-    //         accountsToUpdate.add(acc); 
-    //     }
-        
-    //     if(accountsToUpdate.size()>0){
-    //         update accountsToUpdate;
-    //     }
-    // }
+    public static void updateOpportunityAmountOnAccount(List<Account> newAccounts) {
+        Set<Id> accIdWithOpp = new Set<Id>();
+        for(Account acc: newAccounts)
+        {
+            acc.Total_Opportunity_Amount__c =0;
+            accIdWithOpp.add(acc.Id);
+        }
+        List<AggregateResult> results = [SELECT AccountId, Sum(Amount) TotalAmount FROM Opportunity
+                                            WHERE AccountId IN:accIdWithOpp 
+                                            Group By AccountId];
+        Map<Id,Double> accMap = new Map<Id,Double>();
+        List<Account> accountsToUpdate = new List<Account>();
+        for(AggregateResult res: results){
+            Id accountId = (Id) res.get('AccountId');
+            Double totalAmount = (double) res.get('TotalAmount');
+            accMap.put(accountId, totalAmount);
+        }
+        for(Account acc:newAccounts){
+            if(accMap.containsKey(acc.Id)){
+                acc.Total_Opportunity_Amount__c = accMap.get(acc.Id);
+            }
+        }
+        if(accountsToUpdate.size()>0){
+            update accountsToUpdate;
+        }
+    }
 
     public static void emailAlertOnAccountTypeChange(List<Account> newAccount,Map<Id,Account> mapOfAccount) {
         List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
