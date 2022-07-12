@@ -12,7 +12,7 @@ trigger ContactTrigger on Contact (after insert,before insert, before update,aft
             ContactTriggerHandler.sendEmailOnContactInsertion(Trigger.new);
         }
          if(trigger.isUpdate){
-            ContactTriggerHandler.updateOpportunityAmountOnContactUpdate(Trigger.new,Trigger.oldMap);
+            ContactTriggerHandler.updateOpportunityAmountOnContactUpdate(Trigger.new);
         }
     }
     

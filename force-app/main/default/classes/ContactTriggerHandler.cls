@@ -104,12 +104,10 @@ public class ContactTriggerHandler {
        
     }
 
-    public static void updateOpportunityAmountOnContactUpdate(List<Contact> newContacts,Map<Id,Contact> oldValue) {
+    public static void updateOpportunityAmountOnContactUpdate(List<Contact> newContacts) {
         Set<Id> accIdWithOpp = new Set<Id>();
-        for(Contact con: newContacts)
-        {   if(con.AccountId != oldValue.get(con.Id).AccountId ){
-                accIdWithOpp.add(con.AccountId);
-            }
+        for(Contact con: newContacts){
+            accIdWithOpp.add(con.AccountId);   
         }
         List<AggregateResult> results = [SELECT AccountId, Sum(Amount) TotalAmount FROM Opportunity
                                             WHERE AccountId IN:accIdWithOpp 

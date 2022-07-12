@@ -15,5 +15,26 @@ public with sharing class OpportunityTriggerHandler {
        insert oliList;
    }
 
+   public static void updateAssociatedAccountClientContact(List<Opportunity> newOpportunities) {
+    Set<Id> accIdWithOpp = new Set<Id>();
+    for(Opportunity opp:newOpportunities) {
+        accIdWithOpp.add(opp.AccountId);
+    }
+    List<Account> accTobeUpdated = new List<Account>();
+    List<Account> accWithOpp =[SELECT Id, Name, Client_Contact_lookup_to_Contact__c,(Select Id,Name,Opportunity_Client_Contact__c FROM Opportunities) FROM Account 
+                            WHERE Id IN: accIdWithOpp];
+    for(Account acc:accWithOpp){
+        List<Opportunity> opp = acc.Opportunities;
+        for(Opportunity op:opp){
+            if(op.Opportunity_Client_Contact__c !=null){
+                acc.Client_Contact_lookup_to_Contact__c = op.Opportunity_Client_Contact__c;
+            }
+        }
+        accTobeUpdated.add(acc);
+    }
+    if(accTobeUpdated.size()>0){
+        update accTobeUpdated;
+    }
+   }
    
 }
