@@ -15,7 +15,8 @@ public with sharing class OpportunityTriggerHandler {
        insert oliList;
    }
 
-   public static void updateAssociatedAccountClientContact(List<Opportunity> newOpportunities) {
+   //code working but not of single org with all triggers due to conflict/dependency issue
+   /*public static void updateAssociatedAccountClientContact(List<Opportunity> newOpportunities) {
     Set<Id> accIdWithOpp = new Set<Id>();
     for(Opportunity opp:newOpportunities) {
         accIdWithOpp.add(opp.AccountId);
@@ -36,5 +37,28 @@ public with sharing class OpportunityTriggerHandler {
         update accTobeUpdated;
     }
    }
+
+   
+   public static void updateAccountMultiSelectValue(List<Opportunity> newOpportunities) {
+    Set<Id> accIdWithOpp = new Set<Id>();
+    for(Opportunity opp:newOpportunities) {
+        accIdWithOpp.add(opp.AccountId);
+    }
+    List<Account> accTobeUpdated = new List<Account>();
+    List<Account> accWithOpp =[SELECT Id, Name, Selected_Me_Value__c,(Select Id,Name,Select_Me__c FROM Opportunities) FROM Account 
+                            WHERE Id IN: accIdWithOpp];
+    for(Account acc:accWithOpp){
+        List<Opportunity> opp = acc.Opportunities;
+        for(Opportunity op:opp){
+            if(op.Select_Me__c !=null){
+                acc.Selected_Me_Value__c = op.Select_Me__c;
+            }
+        }
+        accTobeUpdated.add(acc);
+    }
+    if(accTobeUpdated.size()>0){
+        update accTobeUpdated;
+    }
+   }*/
    
 }
