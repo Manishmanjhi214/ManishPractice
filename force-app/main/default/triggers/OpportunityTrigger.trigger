@@ -7,6 +7,7 @@ if(Trigger.isAfter){
         //Method working but not of single org with all triggers due to conflict/dependency issue
         /*OpportunityTriggerHandler.updateAssociatedAccountClientContact(Trigger.new);
         OpportunityTriggerHandler.updateAccountMultiSelectValue(Trigger.new);*/
+        OpportunityTriggerHandler.emailAlertOnOpportunityStageChange(Trigger.new,Trigger.oldMap);
     }
     
 }

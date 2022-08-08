@@ -61,4 +61,32 @@ public with sharing class OpportunityTriggerHandler {
     }
    }*/
    
+   public static void emailAlertOnOpportunityStageChange(List<Opportunity> newOpportunities,Map<Id,Opportunity> mapOfOpportunities) {
+    List<Messaging.SingleEmailMessage> emailList = new List<Messaging.SingleEmailMessage>();
+    Set<Id> accIds = new Set<Id>();
+    for(Opportunity opp:newOpportunities) {
+       if(opp.StageName !=mapOfOpportunities.get(opp.Id).StageName){
+        accIds.add(opp.AccountId);
+       }
+    }
+    List<Account> updatedAccountWithContacts = [SELECT Id,Name,Client_Contact_lookup_to_Contact__c FROM Account
+                                                WHERE Id IN: accIds];
+    if(updatedAccountWithContacts.size()>0){
+        for(Account acc:updatedAccountWithContacts){
+            if( acc.Client_Contact_lookup_to_Contact__c!=null){
+                Contact con = [Select Id,Name,Email FROM Contact WHERE Id =: acc.Client_Contact_lookup_to_Contact__c];
+                Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+                email.setSenderDisplayName('System Administrator');
+                email.setUseSignature(false);
+                email.setBccSender(false);
+                email.setSaveAsActivity(false);
+                email.ToAddresses= new String[] {con.Email};
+                email.Subject = 'Account Update Info';
+                email.setHtmlBody('<html><body>Hi, Your account information has been updated successfully with new Type '+'</body> </html>');
+                emailList.add(email);
+            }
+        }
+    }
+    Messaging.sendEmail(emailList);
+   }
 }

@@ -21,6 +21,7 @@ trigger AccountTrigger on Account (before insert,after insert,before update ,aft
         if(trigger.isUpdate){
             AccountTriggerHandler.updateContactMailAddress(Trigger.new,Trigger.oldMap);
             AccountTriggerHandler.emailAlertOnAccountTypeChange(Trigger.new, Trigger.oldMap);
+            AccountTriggerHandler.copyAssetsFromOpportunityLineItemsOnAccountUpdate(Trigger.new);
         }
     }
 

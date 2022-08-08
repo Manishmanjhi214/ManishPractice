@@ -190,4 +190,23 @@ public with sharing class AccountTriggerHandler {
             Messaging.sendEmail(emails);
         }
     }
+    public static void copyAssetsFromOpportunityLineItemsOnAccountUpdate(List<Account> newAccounts) {
+        Set<Id> accIds = new Set<Id>();
+        for(Account acc:newAccounts){
+            accIds.add(acc.Id);
+        }
+        List<Opportunity> opportunityWithAccount = [SELECT Id, Name, AccountId ,(SELECT Id,Name,Product2Id, Opportunity.AccountId FROM OpportunityLineItems) FROM Opportunity
+                                                    WHERE AccountId IN: accIds];
+        List<Asset> newAssets = new List<Asset>();
+        for(Opportunity opp: opportunityWithAccount){
+            List<OpportunityLineItem> oppLineItems = opp.OpportunityLineItems;
+            for(OpportunityLineItem oppLineItem: oppLineItems){
+                Asset asset = new Asset(Name = oppLineItem.Name+'Asset', Product2Id = oppLineItem.Product2Id, AccountId = opp.AccountId);
+                newAssets.add(asset);
+            }
+        }
+        if(newAssets.size()>0){
+            insert newAssets;
+        }
+    }
 }
